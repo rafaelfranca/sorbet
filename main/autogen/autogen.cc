@@ -1,6 +1,7 @@
 // has to go first because it violates our poisons
 #include "msgpack.hpp"
 
+#include "absl/strings/str_split.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
 #include "common/typecase.h"
@@ -671,6 +672,36 @@ void ParsedFile::classlist(core::Context ctx, vector<string> &out) {
         }
         auto names = showFullName(ctx, def.id);
         out.emplace_back(fmt::format("{}", fmt::map_join(names, "::", nameToString)));
+    }
+}
+
+NamedDefinition ParsedFile::toNamed(core::Context ctx, DefinitionRef def) {
+    auto nameToString = [&](const auto &nm) -> string { return nm.data(ctx)->show(ctx); };
+    auto names = showFullName(ctx, def);
+    return {def.data(*this), fmt::format("{}", fmt::map_join(names, "::", nameToString)), tree.file};
+}
+
+std::string_view NamedDefinition::toString(core::Context ctx) const {
+    return fmt::format("DEF {} ({}) {}", name, def.type, fileRef.data(ctx).path());
+}
+
+void DefTree::prettyPrint(core::Context ctx, int level) {
+    fmt::print("{}\n", name);
+    for (auto &[name, tree] : children) {
+        tree->prettyPrint(ctx, level + 1);
+    }
+}
+
+void DefTree::addDef(core::Context ctx, NamedDefinition &def) {
+    // vector<string> nameParts = absl::StrSplit(def.name, "::");
+    auto sepPos = def.name.find("::");
+    string part = def.name.substr(0, sepPos);
+
+    fmt::print("addDef: {}\n", def.toString(ctx));
+    if (children.find(part) == children.end()) {
+        auto child = make_unique<DefTree>();
+        child->name = part;
+        children[part] = move(child);
     }
 }
 

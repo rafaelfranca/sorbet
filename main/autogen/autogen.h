@@ -55,6 +55,24 @@ struct Definition {
     ReferenceRef defining_ref;
 };
 
+struct NamedDefinition {
+    Definition def;
+    std::string name;
+    core::FileRef fileRef;
+
+    std::string_view toString(core::Context ctx) const;
+};
+
+class DefTree {
+public:
+    std::string name;
+    // std::vector<std::unique_ptr<DefTree>> children;
+    UnorderedMap<std::string, std::unique_ptr<DefTree>> children;
+
+    void addDef(core::Context ctx, NamedDefinition &def);
+    void prettyPrint(core::Context ctx, int level = 0);
+};
+
 struct Reference {
     ReferenceRef id;
 
@@ -82,6 +100,7 @@ struct ParsedFile {
     std::string toString(core::Context ctx);
     std::string toMsgpack(core::Context ctx, int version);
     void classlist(core::Context ctx, std::vector<std::string> &out);
+    NamedDefinition toNamed(core::Context ctx, DefinitionRef def);
 
 private:
     std::vector<core::NameRef> showFullName(core::Context ctx, DefinitionRef def);

@@ -157,6 +157,7 @@ struct AutogenResult {
         string strval;
         string msgpack;
         vector<string> classlist;
+        vector<autogen::NamedDefinition> defs;
     };
     CounterState counters;
     vector<pair<int, Serialized>> prints;
@@ -200,6 +201,11 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
                     Timer timeit(logger, "autogenClasslist");
                     pf.classlist(ctx, serialized.classlist);
                 }
+                for (auto &def : pf.defs) {
+                    serialized.defs.emplace_back(pf.toNamed(ctx, def.id));
+                }
+                fmt::print("Def len: {}", pf.defs.size());
+
                 out.prints.emplace_back(make_pair(idx, serialized));
             }
         }
@@ -220,6 +226,7 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
     }
     fast_sort(merged, [](const auto &lhs, const auto &rhs) -> bool { return lhs.first < rhs.first; });
 
+    autogen::DefTree root;
     for (auto &elem : merged) {
         if (opts.print.Autogen.enabled) {
             opts.print.Autogen.print(elem.second.strval);
@@ -227,7 +234,18 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
         if (opts.print.AutogenMsgPack.enabled) {
             opts.print.AutogenMsgPack.print(elem.second.msgpack);
         }
+        auto &defs = elem.second.defs;
+        for (auto &def : defs) {
+            // fmt::print("DEF {} ({}) {}\n", def.name, def.def.type, def.fileRef.data(ctx).path());
+            if (def.def.id.id() == 0) {
+                continue; // TODO what's going on with these
+            }
+            root.addDef(ctx, def);
+        }
     }
+    fmt::print("-- ROOT start --\n");
+    root.prettyPrint(ctx);
+    fmt::print("-- ROOT end   --\n");
     if (opts.print.AutogenClasslist.enabled) {
         Timer timeit(logger, "autogenClasslistPrint");
         vector<string> mergedClasslist;
