@@ -202,9 +202,9 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
                     pf.classlist(ctx, serialized.classlist);
                 }
                 for (auto &def : pf.defs) {
+                    // TODO weird empty defs appearing
                     serialized.defs.emplace_back(pf.toNamed(ctx, def.id));
                 }
-                fmt::print("Def len: {}", pf.defs.size());
 
                 out.prints.emplace_back(make_pair(idx, serialized));
             }

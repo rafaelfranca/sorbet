@@ -678,7 +678,7 @@ void ParsedFile::classlist(core::Context ctx, vector<string> &out) {
 NamedDefinition ParsedFile::toNamed(core::Context ctx, DefinitionRef def) {
     auto nameToString = [&](const auto &nm) -> string { return nm.data(ctx)->show(ctx); };
     auto names = showFullName(ctx, def);
-    return {def.data(*this), fmt::format("{}", fmt::map_join(names, "::", nameToString)), tree.file};
+    return {def.data(*this), fmt::format("{}", fmt::map_join(names, "::", nameToString)), names, tree.file};
 }
 
 std::string_view NamedDefinition::toString(core::Context ctx) const {
@@ -688,21 +688,39 @@ std::string_view NamedDefinition::toString(core::Context ctx) const {
 void DefTree::prettyPrint(core::Context ctx, int level) {
     fmt::print("{}\n", name);
     for (auto &[name, tree] : children) {
+        for (int i = 0; i < level; ++i) {
+            fmt::print("  ");
+        }
         tree->prettyPrint(ctx, level + 1);
     }
 }
 
-void DefTree::addDef(core::Context ctx, NamedDefinition &def) {
-    // vector<string> nameParts = absl::StrSplit(def.name, "::");
-    auto sepPos = def.name.find("::");
-    string part = def.name.substr(0, sepPos);
-
-    fmt::print("addDef: {}\n", def.toString(ctx));
+void DefTree::addDef(core::Context ctx, NamedDefinition &def, int idx) {
+    if (idx == def.nameParts.size()) {
+        return;
+    }
+    auto part = def.nameParts[idx].show(ctx);
     if (children.find(part) == children.end()) {
         auto child = make_unique<DefTree>();
         child->name = part;
         children[part] = move(child);
     }
+    children[part]->addDef(ctx, def, idx + 1);
+
+    // auto sepPos = def.name.find("::");
+    // string part = def.name.substr(0, sepPos);
+
+    // fmt::print("addDef: {}\n", def.toString(ctx));
+    // if (children.find(part) == children.end()) {
+    //     auto child = make_unique<DefTree>();
+    //     child->name = part;
+    //     children[part] = move(child);
+    // }
+    // if (sepPos != string::npos) {
+    //     string rest = def.name.substr(sepPos + 2, string::npos);
+    //     fmt::print(" REST {} {}\n", def.name, rest);
+    //     // children[part]->add
+    // }
 }
 
 } // namespace sorbet::autogen

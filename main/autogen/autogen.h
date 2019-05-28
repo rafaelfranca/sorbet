@@ -58,6 +58,7 @@ struct Definition {
 struct NamedDefinition {
     Definition def;
     std::string name;
+    std::vector<core::NameRef> nameParts;
     core::FileRef fileRef;
 
     std::string_view toString(core::Context ctx) const;
@@ -65,11 +66,11 @@ struct NamedDefinition {
 
 class DefTree {
 public:
-    std::string name;
+    std::string name; // TODO can I kill this
     // std::vector<std::unique_ptr<DefTree>> children;
     UnorderedMap<std::string, std::unique_ptr<DefTree>> children;
 
-    void addDef(core::Context ctx, NamedDefinition &def);
+    void addDef(core::Context ctx, NamedDefinition &def, int idx = 0);
     void prettyPrint(core::Context ctx, int level = 0);
 };
 
