@@ -686,7 +686,8 @@ std::string_view NamedDefinition::toString(core::Context ctx) const {
 }
 
 void DefTree::prettyPrint(core::Context ctx, int level) {
-    fmt::print("{}\n", name);
+    auto fileRefToString = [&](const core::FileRef &fr) -> string_view { return fr.data(ctx).path(); };
+    fmt::print("{} [{}]\n", name, fmt::map_join(definingFiles, ", ", fileRefToString));
     for (auto &[name, tree] : children) {
         for (int i = 0; i < level; ++i) {
             fmt::print("  ");
@@ -695,32 +696,19 @@ void DefTree::prettyPrint(core::Context ctx, int level) {
     }
 }
 
-void DefTree::addDef(core::Context ctx, NamedDefinition &def, int idx) {
-    if (idx == def.nameParts.size()) {
-        return;
+void DefTree::addDef(core::Context ctx, const NamedDefinition &ndef) {
+    auto *node = this;
+    for (const auto &part : ndef.nameParts) {
+        auto &child = node->children[part.show(ctx)];
+        if (!child) {
+            child = make_unique<DefTree>();
+            child->name = part.show(ctx);
+        }
+        node = &*child; // TODO yuck
     }
-    auto part = def.nameParts[idx].show(ctx);
-    if (children.find(part) == children.end()) {
-        auto child = make_unique<DefTree>();
-        child->name = part;
-        children[part] = move(child);
+    if (ndef.def.defines_behavior) {
+        node->definingFiles.emplace_back(ndef.fileRef);
     }
-    children[part]->addDef(ctx, def, idx + 1);
-
-    // auto sepPos = def.name.find("::");
-    // string part = def.name.substr(0, sepPos);
-
-    // fmt::print("addDef: {}\n", def.toString(ctx));
-    // if (children.find(part) == children.end()) {
-    //     auto child = make_unique<DefTree>();
-    //     child->name = part;
-    //     children[part] = move(child);
-    // }
-    // if (sepPos != string::npos) {
-    //     string rest = def.name.substr(sepPos + 2, string::npos);
-    //     fmt::print(" REST {} {}\n", def.name, rest);
-    //     // children[part]->add
-    // }
 }
 
 } // namespace sorbet::autogen

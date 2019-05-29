@@ -69,8 +69,9 @@ public:
     std::string name; // TODO can I kill this
     // std::vector<std::unique_ptr<DefTree>> children;
     UnorderedMap<std::string, std::unique_ptr<DefTree>> children;
+    std::vector<core::FileRef> definingFiles;
 
-    void addDef(core::Context ctx, NamedDefinition &def, int idx = 0);
+    void addDef(core::Context, const NamedDefinition &);
     void prettyPrint(core::Context ctx, int level = 0);
 };
 
