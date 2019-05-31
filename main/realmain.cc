@@ -246,6 +246,10 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
     fmt::print("-- ROOT start --\n");
     root.prettyPrint(ctx);
     fmt::print("-- ROOT end   --\n");
+    if (opts.print.AutogenAutoloader.enabled) {
+        root.writeAutoloads(ctx, opts.print.AutogenAutoloader.outputPath);
+    }
+
     if (opts.print.AutogenClasslist.enabled) {
         Timer timeit(logger, "autogenClasslistPrint");
         vector<string> mergedClasslist;
@@ -360,7 +364,7 @@ int realmain(int argc, char *argv[]) {
     if (opts.suggestRuntimeProfiledType) {
         gs->suggestRuntimeProfiledType = true;
     }
-    if (opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled || opts.print.AutogenClasslist.enabled) {
+    if (opts.print.isAutogen()) {
         gs->runningUnderAutogen = true;
     }
     if (opts.reserveMemKiB > 0) {

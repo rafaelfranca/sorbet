@@ -66,13 +66,15 @@ struct NamedDefinition {
 
 class DefTree {
 public:
-    std::string name; // TODO can I kill this
-    // std::vector<std::unique_ptr<DefTree>> children;
-    UnorderedMap<std::string, std::unique_ptr<DefTree>> children;
+    std::string name;                                             // TODO switch to refs
+    UnorderedMap<std::string, std::unique_ptr<DefTree>> children; // TODO switch to refs
     std::vector<core::FileRef> definingFiles;
 
     void addDef(core::Context, const NamedDefinition &);
     void prettyPrint(core::Context ctx, int level = 0);
+
+    void writeAutoloads(core::Context ctx, std::string &path);
+    std::string autoloads(core::Context ctx);
 };
 
 struct Reference {
