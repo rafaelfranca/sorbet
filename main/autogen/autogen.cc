@@ -781,7 +781,11 @@ string DefTree::autoloads(core::Context ctx) {
     predeclare(ctx, fullName, buf);
     if (!children.empty()) {
         fmt::format_to(buf, "\nOpus::Require.autoload_map({}, {{\n", fullName);
-        for (auto &[childName, child] : children) {
+        vector<string> childNames;
+        std::transform(children.begin(), children.end(), back_inserter(childNames),
+                       [](const auto &pair) -> string { return pair.first; });
+        fast_sort(childNames);
+        for (const auto &childName : childNames) {
             fmt::format_to(buf, "  {}: TODO,\n", childName);
         }
         fmt::format_to(buf, "}})\n", fullName);
