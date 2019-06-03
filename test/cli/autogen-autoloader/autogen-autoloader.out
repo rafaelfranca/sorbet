@@ -1,27 +1,4 @@
--- ROOT start --
- []
-Foo []
-  Bar []
-    Jazz [test/cli/autogen-autoloader/foo.rb]
-      JazBaz [test/cli/autogen-autoloader/foo.rb]
-    Quuz [test/cli/autogen-autoloader/foo.rb]
-Yabba []
-  Dabba []
-    Jazz []
-      JazBaz [test/cli/autogen-autoloader/bar.rb]
-    Quuz [test/cli/autogen-autoloader/bar.rb]
--- ROOT end   --
-writeAutoloads  'output'
-writeAutoloads Foo 'output'
-writeAutoloads Bar 'output/Foo'
-writeAutoloads Jazz 'output/Foo/Bar'
-writeAutoloads JazBaz 'output/Foo/Bar/Jazz'
-writeAutoloads Quuz 'output/Foo/Bar'
-writeAutoloads Yabba 'output'
-writeAutoloads Dabba 'output/Yabba'
-writeAutoloads Jazz 'output/Yabba/Dabba'
-writeAutoloads JazBaz 'output/Yabba/Dabba/Jazz'
-writeAutoloads Quuz 'output/Yabba/Dabba'
+No errors! Great job.
 
 --- output/Foo.rb
 # frozen_string_literal: true
@@ -62,7 +39,7 @@ Opus::Require.autoload_map(Foo::Bar, {
 # typed: true
 
 Opus::Require.on_autoload('Foo::Bar::Jazz')
-class Foo::Bar::Jazz
+class Foo::Bar::Jazz < Foo::Bar::Quuz
 end
 
 Opus::Require.autoload_map(Foo::Bar::Jazz, {
@@ -164,7 +141,7 @@ Opus::Require.for_autoload(Yabba::Dabba::Jazz::JazBaz, "test/cli/autogen-autoloa
 # typed: true
 
 Opus::Require.on_autoload('Yabba::Dabba::Quuz')
-class Yabba::Dabba::Quuz
+class Yabba::Dabba::Quuz < AWS::String
 end
 
 Opus::Require.for_autoload(Yabba::Dabba::Quuz, "test/cli/autogen-autoloader/bar.rb")

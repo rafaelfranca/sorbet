@@ -243,9 +243,9 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
             root.addDef(ctx, def);
         }
     }
-    fmt::print("-- ROOT start --\n");
-    root.prettyPrint(ctx);
-    fmt::print("-- ROOT end   --\n");
+    // fmt::print("-- ROOT start --\n");
+    // root.prettyPrint(ctx);
+    // fmt::print("-- ROOT end   --\n");
     if (opts.print.AutogenAutoloader.enabled) {
         root.writeAutoloads(ctx, opts.print.AutogenAutoloader.outputPath);
     }

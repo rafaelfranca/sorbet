@@ -747,7 +747,7 @@ void create_dir(string path) {
 }
 
 void DefTree::writeAutoloads(core::Context ctx, std::string &path) {
-    fmt::print("writeAutoloads {} '{}'\n", name, path);
+    // fmt::print("writeAutoloads {} '{}'\n", name, path);
     if (!name.empty()) {
         FileOps::write(join(path, fmt::format("{}.rb", name)), autoloads(ctx));
     }
@@ -766,6 +766,11 @@ void DefTree::predeclare(core::Context ctx, string_view fullName, fmt::memory_bu
     if (!namedDefs.empty() && namedDefs[0].def.type == Definition::Class) {
         fmt::format_to(buf, "class {}", fullName);
         // TODO parent class
+        if (!namedDefs[0].parentName.empty()) {
+            fmt::format_to(buf, " < {}", fmt::map_join(namedDefs[0].parentName, "::", [&](const auto &nr) -> string {
+                               return nr.show(ctx);
+                           }));
+        }
     } else {
         fmt::format_to(buf, "module {}", fullName);
     }
