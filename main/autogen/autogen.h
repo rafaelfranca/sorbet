@@ -59,6 +59,7 @@ struct NamedDefinition {
     Definition def;
     std::string name;
     std::vector<core::NameRef> nameParts;
+    std::vector<core::NameRef> parentName;
     core::FileRef fileRef;
 
     std::string_view toString(core::Context ctx) const;
@@ -68,13 +69,17 @@ class DefTree {
 public:
     std::string name;                                             // TODO switch to refs
     UnorderedMap<std::string, std::unique_ptr<DefTree>> children; // TODO switch to refs
-    std::vector<core::FileRef> definingFiles;
+    std::vector<NamedDefinition> namedDefs;
+    std::vector<core::NameRef> nameParts;
 
     void addDef(core::Context, const NamedDefinition &);
     void prettyPrint(core::Context ctx, int level = 0);
 
     void writeAutoloads(core::Context ctx, std::string &path);
     std::string autoloads(core::Context ctx);
+
+private:
+    void predeclare(core::Context ctx, std::string_view fullName, fmt::memory_buffer &buf);
 };
 
 struct Reference {
