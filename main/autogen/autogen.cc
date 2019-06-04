@@ -764,7 +764,7 @@ void DefTree::writeAutoloads(core::Context ctx, std::string &path) {
 
 void DefTree::predeclare(core::Context ctx, string_view fullName, fmt::memory_buffer &buf) {
     if (!namedDefs.empty() && namedDefs[0].def.type == Definition::Class) {
-        fmt::format_to(buf, "class {}", fullName);
+        fmt::format_to(buf, "\nclass {}", fullName);
         // TODO parent class
         if (!namedDefs[0].parentName.empty()) {
             fmt::format_to(buf, " < {}", fmt::map_join(namedDefs[0].parentName, "::", [&](const auto &nr) -> string {
@@ -772,7 +772,7 @@ void DefTree::predeclare(core::Context ctx, string_view fullName, fmt::memory_bu
                            }));
         }
     } else {
-        fmt::format_to(buf, "module {}", fullName);
+        fmt::format_to(buf, "\nmodule {}", fullName);
     }
     fmt::format_to(buf, "\nend\n");
 }

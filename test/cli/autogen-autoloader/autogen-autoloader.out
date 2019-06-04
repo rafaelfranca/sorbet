@@ -8,6 +8,7 @@ No errors! Great job.
 # typed: true
 
 Opus::Require.on_autoload('Foo')
+
 module Foo
 end
 
@@ -23,6 +24,7 @@ Opus::Require.autoload_map(Foo, {
 # typed: true
 
 Opus::Require.on_autoload('Foo::Bar')
+
 module Foo::Bar
 end
 
@@ -39,6 +41,7 @@ Opus::Require.autoload_map(Foo::Bar, {
 # typed: true
 
 Opus::Require.on_autoload('Foo::Bar::Jazz')
+
 class Foo::Bar::Jazz < Foo::Bar::Quuz
 end
 
@@ -56,6 +59,7 @@ Opus::Require.for_autoload(Foo::Bar::Jazz, "test/cli/autogen-autoloader/foo.rb")
 # typed: true
 
 Opus::Require.on_autoload('Foo::Bar::Jazz::JazBaz')
+
 class Foo::Bar::Jazz::JazBaz
 end
 
@@ -69,6 +73,7 @@ Opus::Require.for_autoload(Foo::Bar::Jazz::JazBaz, "test/cli/autogen-autoloader/
 # typed: true
 
 Opus::Require.on_autoload('Foo::Bar::Quuz')
+
 class Foo::Bar::Quuz
 end
 
@@ -82,6 +87,7 @@ Opus::Require.for_autoload(Foo::Bar::Quuz, "test/cli/autogen-autoloader/foo.rb")
 # typed: true
 
 Opus::Require.on_autoload('Yabba')
+
 module Yabba
 end
 
@@ -97,6 +103,7 @@ Opus::Require.autoload_map(Yabba, {
 # typed: true
 
 Opus::Require.on_autoload('Yabba::Dabba')
+
 module Yabba::Dabba
 end
 
@@ -113,6 +120,7 @@ Opus::Require.autoload_map(Yabba::Dabba, {
 # typed: true
 
 Opus::Require.on_autoload('Yabba::Dabba::Jazz')
+
 module Yabba::Dabba::Jazz
 end
 
@@ -128,6 +136,7 @@ Opus::Require.autoload_map(Yabba::Dabba::Jazz, {
 # typed: true
 
 Opus::Require.on_autoload('Yabba::Dabba::Jazz::JazBaz')
+
 class Yabba::Dabba::Jazz::JazBaz
 end
 
@@ -141,6 +150,7 @@ Opus::Require.for_autoload(Yabba::Dabba::Jazz::JazBaz, "test/cli/autogen-autoloa
 # typed: true
 
 Opus::Require.on_autoload('Yabba::Dabba::Quuz')
+
 class Yabba::Dabba::Quuz < AWS::String
 end
 
