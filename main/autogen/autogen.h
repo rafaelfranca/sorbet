@@ -78,6 +78,8 @@ public:
     void writeAutoloads(core::Context ctx, std::string &path);
     std::string autoloads(core::Context ctx);
 
+    std::string path(core::Context ctx);
+
 private:
     void predeclare(core::Context ctx, std::string_view fullName, fmt::memory_buffer &buf);
 };

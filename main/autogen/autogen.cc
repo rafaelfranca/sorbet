@@ -777,6 +777,11 @@ void DefTree::predeclare(core::Context ctx, string_view fullName, fmt::memory_bu
     fmt::format_to(buf, "\nend\n");
 }
 
+string DefTree::path(core::Context ctx) {
+    auto toPath = [&](const auto &fr) -> string { return fr.show(ctx); };
+    return fmt::format("{}.rb", fmt::map_join(nameParts, "/", toPath));
+}
+
 string DefTree::autoloads(core::Context ctx) {
     fmt::memory_buffer buf;
     auto fullName =
@@ -791,7 +796,7 @@ string DefTree::autoloads(core::Context ctx) {
                        [](const auto &pair) -> string { return pair.first; });
         fast_sort(childNames);
         for (const auto &childName : childNames) {
-            fmt::format_to(buf, "  {}: TODO,\n", childName);
+            fmt::format_to(buf, "  {}: autoloader/{},\n", childName, children[childName]->path(ctx));
         }
         fmt::format_to(buf, "}})\n", fullName);
     }
