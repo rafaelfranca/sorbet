@@ -13,7 +13,7 @@ module Foo
 end
 
 Opus::Require.autoload_map(Foo, {
-  Bar: autoloader/Foo/Bar.rb,
+  Bar: "autoloader/Foo/Bar.rb",
 })
 
 --- output/Foo/Bar.rb
@@ -29,8 +29,8 @@ module Foo::Bar
 end
 
 Opus::Require.autoload_map(Foo::Bar, {
-  Jazz: autoloader/Foo/Bar/Jazz.rb,
-  Quuz: autoloader/Foo/Bar/Quuz.rb,
+  Jazz: "autoloader/Foo/Bar/Jazz.rb",
+  Quuz: "autoloader/Foo/Bar/Quuz.rb",
 })
 
 --- output/Foo/Bar/Jazz.rb
@@ -46,7 +46,7 @@ class Foo::Bar::Jazz < Foo::Bar::Quuz
 end
 
 Opus::Require.autoload_map(Foo::Bar::Jazz, {
-  JazBaz: autoloader/Foo/Bar/Jazz/JazBaz.rb,
+  JazBaz: "autoloader/Foo/Bar/Jazz/JazBaz.rb",
 })
 
 Opus::Require.for_autoload(Foo::Bar::Jazz, "test/cli/autogen-autoloader/foo.rb")
@@ -92,7 +92,7 @@ module Yabba
 end
 
 Opus::Require.autoload_map(Yabba, {
-  Dabba: autoloader/Yabba/Dabba.rb,
+  Dabba: "autoloader/Yabba/Dabba.rb",
 })
 
 --- output/Yabba/Dabba.rb
@@ -108,8 +108,8 @@ module Yabba::Dabba
 end
 
 Opus::Require.autoload_map(Yabba::Dabba, {
-  Jazz: autoloader/Yabba/Dabba/Jazz.rb,
-  Quuz: autoloader/Yabba/Dabba/Quuz.rb,
+  Jazz: "autoloader/Yabba/Dabba/Jazz.rb",
+  Quuz: "autoloader/Yabba/Dabba/Quuz.rb",
 })
 
 --- output/Yabba/Dabba/Jazz.rb
@@ -125,7 +125,7 @@ module Yabba::Dabba::Jazz
 end
 
 Opus::Require.autoload_map(Yabba::Dabba::Jazz, {
-  JazBaz: autoloader/Yabba/Dabba/Jazz/JazBaz.rb,
+  JazBaz: "autoloader/Yabba/Dabba/Jazz/JazBaz.rb",
 })
 
 --- output/Yabba/Dabba/Jazz/JazBaz.rb

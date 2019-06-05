@@ -796,7 +796,7 @@ string DefTree::autoloads(core::Context ctx) {
                        [](const auto &pair) -> string { return pair.first; });
         fast_sort(childNames);
         for (const auto &childName : childNames) {
-            fmt::format_to(buf, "  {}: autoloader/{},\n", childName, children[childName]->path(ctx));
+            fmt::format_to(buf, "  {}: \"autoloader/{}\",\n", childName, children[childName]->path(ctx));
         }
         fmt::format_to(buf, "}})\n", fullName);
     }
