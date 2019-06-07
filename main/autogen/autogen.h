@@ -65,6 +65,13 @@ struct NamedDefinition {
     std::string_view toString(core::Context ctx) const;
 };
 
+struct AutoloaderConfig { // TODO dynamic loading
+    UnorderedSet<std::string> topLevelNamespaces{"Opus", "Critic", "Chalk", "T", "Foo", "Yabba"}; // TODO TODO
+    std::string_view rootDir = "autoloader";
+
+    bool include(core::Context, const NamedDefinition &) const;
+};
+
 class DefTree {
 public:
     std::string name;                                             // TODO switch to refs
@@ -72,7 +79,7 @@ public:
     std::vector<NamedDefinition> namedDefs;
     std::vector<core::NameRef> nameParts;
 
-    void addDef(core::Context, const NamedDefinition &);
+    void addDef(core::Context, const AutoloaderConfig &, const NamedDefinition &);
     void prettyPrint(core::Context ctx, int level = 0);
 
     void writeAutoloads(core::Context ctx, std::string &path);

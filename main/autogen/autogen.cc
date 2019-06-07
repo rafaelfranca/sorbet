@@ -695,6 +695,13 @@ std::string_view NamedDefinition::toString(core::Context ctx) const {
     return fmt::format("DEF {} ({}) {}", name, def.type, fileRef.data(ctx).path());
 }
 
+bool AutoloaderConfig::include(core::Context ctx, const NamedDefinition &nd) const {
+    if (nd.nameParts.empty()) {
+        return false;
+    }
+    return topLevelNamespaces.find(nd.nameParts[0].show(ctx)) != topLevelNamespaces.end();
+}
+
 void DefTree::prettyPrint(core::Context ctx, int level) {
     auto fileRefToString = [&](const NamedDefinition &nd) -> string_view { return nd.fileRef.data(ctx).path(); };
     fmt::print("{} [{}]\n", name, fmt::map_join(namedDefs, ", ", fileRefToString));
@@ -706,7 +713,10 @@ void DefTree::prettyPrint(core::Context ctx, int level) {
     }
 }
 
-void DefTree::addDef(core::Context ctx, const NamedDefinition &ndef) {
+void DefTree::addDef(core::Context ctx, const AutoloaderConfig &alCfg, const NamedDefinition &ndef) {
+    if (!alCfg.include(ctx, ndef)) {
+        return;
+    }
     auto *node = this;
     for (const auto &part : ndef.nameParts) {
         auto &child = node->children[part.show(ctx)];
