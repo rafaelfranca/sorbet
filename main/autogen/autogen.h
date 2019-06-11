@@ -136,6 +136,8 @@ public:
     std::string path(core::Context ctx);
 
 private:
+    core::FileRef file() const;
+    bool needsChildAutoloads() const;
     void predeclare(core::Context ctx, std::string_view fullName, fmt::memory_buffer &buf);
     void requires(core::Context ctx, fmt::memory_buffer &buf);
 };

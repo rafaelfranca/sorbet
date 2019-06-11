@@ -697,11 +697,8 @@ std::string_view NamedDefinition::toString(core::Context ctx) const {
 }
 
 bool AutoloaderConfig::include(core::Context ctx, const NamedDefinition &nd) const {
-    if (nd.nameParts.empty() || topLevelNamespaces.find(nd.nameParts[0].show(ctx)) == topLevelNamespaces.end()) {
-        return false;
-    }
-    string path{nd.fileRef.data(ctx).path()};
-    return includePath(path);
+    return !nd.nameParts.empty() && topLevelNamespaces.find(nd.nameParts[0].show(ctx)) != topLevelNamespaces.end() &&
+           includePath(nd.fileRef.data(ctx).path());
 }
 
 static const string_view requiredSuffix = ".rb";
@@ -775,12 +772,55 @@ void create_dir(string path) {
     }
 }
 
+bool visitDefTree(const DefTree &tree, std::function<bool(const DefTree &)> visit) {
+    bool descend = visit(tree);
+    if (!descend) {
+        return false;
+    }
+    for (const auto &[_, child] : tree.children) {
+        descend = visitDefTree(*child, visit);
+        if (!descend) {
+            return false;
+        }
+    }
+    return true;
+}
+
+core::FileRef DefTree::file() const {
+    core::FileRef ref;
+    if (!namedDefs.empty()) {
+        // TODO what if there are more than one?
+        ref = namedDefs[0].fileRef;
+    }
+    return ref;
+}
+
+bool DefTree::needsChildAutoloads() const {
+    if (nameParts.empty()) { // Root node
+        return true;
+    }
+    bool res = false;
+    auto fileRef = file();
+    auto visit = [&](const DefTree &node) -> bool {
+        // fmt::print("  {} {} {}\n", fileRef.id(), node.file().id(), node.name);
+        if (fileRef != node.file()) {
+            res = true;
+            return false;
+        }
+        return true;
+    };
+    visitDefTree(*this, visit);
+    return res;
+}
+
 void DefTree::writeAutoloads(core::Context ctx, std::string &path) {
     // fmt::print("writeAutoloads {} '{}'\n", name, path);
     if (!name.empty()) {
         FileOps::write(join(path, fmt::format("{}.rb", name)), autoloads(ctx));
     }
-    if (!children.empty()) {
+    // fmt::print("write {} {} {}\n", name, needsChildAutoloads(), file().id());
+    if (needsChildAutoloads()) {
+        // TODO merging?
         auto subdir = join(path, name);
         if (!name.empty()) {
             create_dir(subdir);
