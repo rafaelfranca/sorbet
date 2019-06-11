@@ -60,6 +60,7 @@ struct NamedDefinition {
     std::string name;
     std::vector<core::NameRef> nameParts;
     std::vector<core::NameRef> parentName;
+    std::vector<core::NameRef> requires;
     core::FileRef fileRef;
 
     std::string_view toString(core::Context ctx) const;
@@ -89,6 +90,7 @@ public:
 
 private:
     void predeclare(core::Context ctx, std::string_view fullName, fmt::memory_buffer &buf);
+    void requires(core::Context ctx, fmt::memory_buffer &buf);
 };
 
 struct Reference {

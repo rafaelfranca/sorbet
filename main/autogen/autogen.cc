@@ -688,7 +688,8 @@ NamedDefinition ParsedFile::toNamed(core::Context ctx, DefinitionRef def) {
             parentName = parentRef.name;
         }
     }
-    return {def.data(*this), fmt::format("{}", fmt::map_join(names, "::", nameToString)), names, parentName, tree.file};
+    return {def.data(*this), fmt::format("{}", fmt::map_join(names, "::", nameToString)), names, parentName, requires,
+            tree.file};
 }
 
 std::string_view NamedDefinition::toString(core::Context ctx) const {
@@ -772,10 +773,26 @@ void DefTree::writeAutoloads(core::Context ctx, std::string &path) {
     }
 }
 
+void DefTree::requires(core::Context ctx, fmt::memory_buffer &buf) {
+    if (namedDefs.empty()) {
+        return;
+    }
+    // TODO what if there are more than one?
+    auto &ndef = namedDefs[0];
+    vector<string> reqs;
+    for (auto reqRef : ndef.requires) {
+        reqs.emplace_back(reqRef.show(ctx));
+    }
+    fast_sort(reqs);
+    auto last = unique(reqs.begin(), reqs.end());
+    for (auto it = reqs.begin(); it != last; ++it) {
+        fmt::format_to(buf, "require '{}'\n", *it);
+    }
+}
+
 void DefTree::predeclare(core::Context ctx, string_view fullName, fmt::memory_buffer &buf) {
     if (!namedDefs.empty() && namedDefs[0].def.type == Definition::Class) {
         fmt::format_to(buf, "\nclass {}", fullName);
-        // TODO parent class
         if (!namedDefs[0].parentName.empty()) {
             fmt::format_to(buf, " < {}", fmt::map_join(namedDefs[0].parentName, "::", [&](const auto &nr) -> string {
                                return nr.show(ctx);
@@ -784,6 +801,7 @@ void DefTree::predeclare(core::Context ctx, string_view fullName, fmt::memory_bu
     } else {
         fmt::format_to(buf, "\nmodule {}", fullName);
     }
+    // TODO aliases? casgn?
     fmt::format_to(buf, "\nend\n");
 }
 
@@ -797,6 +815,7 @@ string DefTree::autoloads(core::Context ctx) {
     auto fullName =
         fmt::format("{}", fmt::map_join(nameParts, "::", [&](const auto &nr) -> string { return nr.show(ctx); }));
     fmt::format_to(buf, "{}\n", PREAMBLE);
+    requires(ctx, buf);
     fmt::format_to(buf, "Opus::Require.on_autoload('{}')\n", fullName);
     predeclare(ctx, fullName, buf);
     if (!children.empty()) {

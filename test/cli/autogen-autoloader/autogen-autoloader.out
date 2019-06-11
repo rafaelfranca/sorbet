@@ -40,6 +40,9 @@ Opus::Require.autoload_map(Foo::Bar, {
 # Use that.
 # typed: true
 
+require 'in_class'
+require 'in_method'
+require 'my_gem'
 Opus::Require.on_autoload('Foo::Bar::Jazz')
 
 class Foo::Bar::Jazz < Foo::Bar::Quuz
@@ -58,6 +61,9 @@ Opus::Require.for_autoload(Foo::Bar::Jazz, "test/cli/autogen-autoloader/foo.rb")
 # Use that.
 # typed: true
 
+require 'in_class'
+require 'in_method'
+require 'my_gem'
 Opus::Require.on_autoload('Foo::Bar::Jazz::JazBaz')
 
 class Foo::Bar::Jazz::JazBaz
@@ -72,6 +78,9 @@ Opus::Require.for_autoload(Foo::Bar::Jazz::JazBaz, "test/cli/autogen-autoloader/
 # Use that.
 # typed: true
 
+require 'in_class'
+require 'in_method'
+require 'my_gem'
 Opus::Require.on_autoload('Foo::Bar::Quuz')
 
 class Foo::Bar::Quuz
