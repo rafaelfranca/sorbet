@@ -697,10 +697,28 @@ std::string_view NamedDefinition::toString(core::Context ctx) const {
 }
 
 bool AutoloaderConfig::include(core::Context ctx, const NamedDefinition &nd) const {
-    if (nd.nameParts.empty()) {
+    if (nd.nameParts.empty() || topLevelNamespaces.find(nd.nameParts[0].show(ctx)) == topLevelNamespaces.end()) {
         return false;
     }
-    return topLevelNamespaces.find(nd.nameParts[0].show(ctx)) != topLevelNamespaces.end();
+    string path{nd.fileRef.data(ctx).path()};
+    return includePath(path);
+}
+
+static const string_view requiredSuffix = ".rb";
+inline bool hasRequiredSuffix(string_view path) {
+    return path.size() > requiredSuffix.size() && equal(path.rbegin(), path.rend(), requiredSuffix.rbegin());
+}
+
+bool AutoloaderConfig::includePath(string_view path) const {
+    if (hasRequiredSuffix(path)) {
+        return false;
+    }
+    for (const auto &pat : excludePatterns) {
+        if (regex_search(path.begin(), path.end(), pat)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 void DefTree::prettyPrint(core::Context ctx, int level) {

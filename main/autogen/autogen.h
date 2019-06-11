@@ -1,4 +1,5 @@
 #include "ast/ast.h"
+#include <regex>
 
 namespace sorbet::autogen {
 
@@ -66,11 +67,57 @@ struct NamedDefinition {
     std::string_view toString(core::Context ctx) const;
 };
 
+/*
+relative == 'extn.rb' ||
+relative.start_with?('extn/') ||
+# Contains C extensions (which the autoloader doesn't know about). These
+# have to be excluded via path rather than extension due to shenanigans
+# in `ignore_require?` (see comments there for details).
+relative.start_with?('build/cext/') ||
+# Contain wrappers for the C extensions above. These wrappers don't
+# define behavior, so we need to be able to manually require them.
+relative.start_with?('cext/') ||
+# The autoloader system files aren't in the dependency graph, so they
+# should require normally.
+relative.start_with?('build/autoloader/') ||
+# dev/lib code doesn't use autoloaders because it's used
+# by several things (e.g. `pay`) that don't share the
+# pay-server Gemfile and thus can't necessarily load extn.
+relative.start_with?('dev/lib/') ||
+# rubocop plugins need to run quickly without depending on the build
+relative.include?('/rubocop/') ||
+# TODO: stop excluding `scripts` and `bin` directories from autoloading.
+# # All we need to do is expand `NoBadMigrationDeps` to include stuff in these directories.
+relative.start_with?('scripts/') ||
+relative.include?('/scripts/') ||
+relative.start_with?('bin/') ||
+relative.include?('/bin/') ||
+# Vendored gems should use their own requires normally.
+relative.start_with?('vendor/') ||
+# This is for ruby scripts without an extension, .erb files, and the .yml
+# files we put into our ruby-analyze data, all of which are impossible to
+# require.
+!relative.end_with?('.rb') ||
+# This contains a vendored copy of (some of) RDL with a lot of
+# top-level code
+relative.start_with?('lib/ruby-types/rdl-types/')
+*/
+
 struct AutoloaderConfig { // TODO dynamic loading
     UnorderedSet<std::string> topLevelNamespaces{"Opus", "Critic", "Chalk", "T", "Foo", "Yabba"}; // TODO TODO
     std::string_view rootDir = "autoloader";
+    std::vector<std::regex> excludePatterns = {
+        std::regex(R"(^bin/)"),        std::regex(R"(^build/autoloader/)"),
+        std::regex(R"(^build/cext/)"), std::regex(R"(^cext/)"),
+        std::regex(R"(^dev/lib/)"),    std::regex(R"(^extn/)"),
+        std::regex(R"(^extn\.rb$)"),   std::regex(R"(^lib/ruby-types/rdl-types/)"),
+        std::regex(R"(^scripts/)"),    std::regex(R"(^vendor/)"),
+        std::regex(R"(/bin/)"),        std::regex(R"(/rubocop/)"),
+        std::regex(R"(/scripts/)"),
+    };
 
     bool include(core::Context, const NamedDefinition &) const;
+    bool includePath(std::string_view path) const;
 };
 
 class DefTree {
