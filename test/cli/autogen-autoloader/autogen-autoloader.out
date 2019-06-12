@@ -48,10 +48,6 @@ Opus::Require.on_autoload('Foo::Bar::Jazz')
 class Foo::Bar::Jazz < Foo::Bar::Quuz
 end
 
-Opus::Require.autoload_map(Foo::Bar::Jazz, {
-  JazBaz: "autoloader/Foo/Bar/Jazz/JazBaz.rb",
-})
-
 Opus::Require.for_autoload(Foo::Bar::Jazz, "test/cli/autogen-autoloader/foo.rb")
 
 --- output/Foo/Bar/Quuz.rb

@@ -795,15 +795,25 @@ core::FileRef DefTree::file() const {
     return ref;
 }
 
-bool DefTree::needsChildAutoloads() const {
-    if (nameParts.empty()) { // Root node
-        return true;
+void DefTree::prune() {
+    auto definingFile = file();
+    for (auto it = children.begin(); it != children.end(); ++it) {
+        auto &child = it->second;
+        if (child->hasDifferentFile(definingFile)) {
+            child->prune();
+        } else {
+            children.erase(it);
+        }
     }
+}
+
+static const core::FileRef EMPTY_FILE;
+bool DefTree::hasDifferentFile(core::FileRef file) const {
     bool res = false;
-    auto fileRef = file();
     auto visit = [&](const DefTree &node) -> bool {
         // fmt::print("  {} {} {}\n", fileRef.id(), node.file().id(), node.name);
-        if (fileRef != node.file()) {
+        auto f = node.file();
+        if (file != f && f != EMPTY_FILE) {
             res = true;
             return false;
         }
@@ -819,8 +829,7 @@ void DefTree::writeAutoloads(core::Context ctx, std::string &path) {
         FileOps::write(join(path, fmt::format("{}.rb", name)), autoloads(ctx));
     }
     // fmt::print("write {} {} {}\n", name, needsChildAutoloads(), file().id());
-    if (needsChildAutoloads()) {
-        // TODO merging?
+    if (!children.empty()) {
         auto subdir = join(path, name);
         if (!name.empty()) {
             create_dir(subdir);

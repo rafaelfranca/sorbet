@@ -8,6 +8,7 @@ module Yabba
 
     class Jazz
       class JazBaz
+        VALUE = 1
         'x'
       end
     end

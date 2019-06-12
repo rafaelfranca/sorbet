@@ -246,6 +246,7 @@ void runAutogen(core::Context ctx, options::Options &opts, WorkerPool &workers, 
             }
         }
     }
+    root.prune();
     if (opts.print.AutogenAutoloader.enabled) {
         Timer timeit(logger, "autogenAutoloaderWrite");
         root.writeAutoloads(ctx, opts.print.AutogenAutoloader.outputPath);
