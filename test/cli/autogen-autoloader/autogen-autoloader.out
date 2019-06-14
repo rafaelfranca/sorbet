@@ -7,9 +7,6 @@ No errors! Great job.
 # Use that.
 # typed: true
 
-require 'in_class'
-require 'in_method'
-require 'my_gem'
 Opus::Require.on_autoload('Foo')
 
 module Foo
@@ -27,9 +24,6 @@ Opus::Require.autoload_map(Foo, {
 # Use that.
 # typed: true
 
-require 'in_class'
-require 'in_method'
-require 'my_gem'
 Opus::Require.on_autoload('Foo::Bar')
 
 module Foo::Bar

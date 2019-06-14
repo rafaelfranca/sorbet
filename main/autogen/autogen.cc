@@ -901,7 +901,16 @@ string DefTree::path(core::Context ctx) {
 string DefTree::autoloads(core::Context ctx, const AutoloaderConfig &alCfg) {
     fmt::memory_buffer buf;
     fmt::format_to(buf, "{}\n", PREAMBLE);
-    requires(ctx, alCfg, buf);
+
+    core::FileRef definingFile = EMPTY_FILE;
+    if (!namedDefs.empty()) {
+        definingFile = file();
+    } else if (children.empty() && hasDef()) {
+        definingFile = file();
+    }
+    if (definingFile != EMPTY_FILE) {
+        requires(ctx, alCfg, buf);
+    }
 
     string fullName = "nil";
     auto type = definitionType();
@@ -921,13 +930,6 @@ string DefTree::autoloads(core::Context ctx, const AutoloaderConfig &alCfg) {
             }
             fmt::format_to(buf, "}})\n", fullName);
         }
-    }
-
-    core::FileRef definingFile = EMPTY_FILE;
-    if (!namedDefs.empty()) {
-        definingFile = file();
-    } else if (children.empty() && hasDef()) {
-        definingFile = file();
     }
 
     if (definingFile != EMPTY_FILE) {
