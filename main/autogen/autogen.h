@@ -65,6 +65,12 @@ struct NamedDefinition {
     core::FileRef fileRef;
 
     std::string_view toString(core::Context ctx) const;
+
+    // NamedDefinition() = default;
+    // NamedDefinition(const NamedDefinition &) = delete;
+    // NamedDefinition(NamedDefinition &&) = default;
+    // NamedDefinition &operator=(const NamedDefinition &) = delete;
+    // NamedDefinition &operator=(NamedDefinition &&) = delete;
 };
 
 /*
@@ -142,6 +148,8 @@ private:
     void predeclare(core::Context ctx, std::string_view fullName, fmt::memory_buffer &buf);
     void requires(core::Context ctx, fmt::memory_buffer &buf);
     bool hasDifferentFile(core::FileRef) const;
+    NamedDefinition &definition();
+    Definition::Type definitionType();
 };
 
 struct Reference {

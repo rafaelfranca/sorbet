@@ -879,28 +879,45 @@ string DefTree::path(core::Context ctx) {
 
 string DefTree::autoloads(core::Context ctx) {
     fmt::memory_buffer buf;
-    auto fullName =
-        fmt::format("{}", fmt::map_join(nameParts, "::", [&](const auto &nr) -> string { return nr.show(ctx); }));
     fmt::format_to(buf, "{}\n", PREAMBLE);
     requires(ctx, buf);
-    fmt::format_to(buf, "Opus::Require.on_autoload('{}')\n", fullName);
-    predeclare(ctx, fullName, buf);
-    if (!children.empty()) {
-        fmt::format_to(buf, "\nOpus::Require.autoload_map({}, {{\n", fullName);
-        vector<string> childNames;
-        std::transform(children.begin(), children.end(), back_inserter(childNames),
-                       [](const auto &pair) -> string { return pair.first; });
-        fast_sort(childNames);
-        for (const auto &childName : childNames) {
-            fmt::format_to(buf, "  {}: \"autoloader/{}\",\n", childName, children[childName]->path(ctx));
+
+    string fullName = "nil";
+    auto type = definitionType();
+    if (type == Definition::Module || type == Definition::Class) {
+        fullName =
+            fmt::format("{}", fmt::map_join(nameParts, "::", [&](const auto &nr) -> string { return nr.show(ctx); }));
+        fmt::format_to(buf, "Opus::Require.on_autoload('{}')\n", fullName);
+        predeclare(ctx, fullName, buf);
+        if (!children.empty()) {
+            fmt::format_to(buf, "\nOpus::Require.autoload_map({}, {{\n", fullName);
+            vector<string> childNames;
+            std::transform(children.begin(), children.end(), back_inserter(childNames),
+                           [](const auto &pair) -> string { return pair.first; });
+            fast_sort(childNames);
+            for (const auto &childName : childNames) {
+                fmt::format_to(buf, "  {}: \"autoloader/{}\",\n", childName, children[childName]->path(ctx));
+            }
+            fmt::format_to(buf, "}})\n", fullName);
         }
-        fmt::format_to(buf, "}})\n", fullName);
     }
     if (!namedDefs.empty()) {
-        auto &nd = namedDefs[0]; // TODO what if there are more than one
-        fmt::format_to(buf, "\nOpus::Require.for_autoload({}, \"{}\")\n", fullName, nd.fileRef.data(ctx).path());
+        fmt::format_to(buf, "\nOpus::Require.for_autoload({}, \"{}\")\n", fullName,
+                       definition().fileRef.data(ctx).path());
     }
     return to_string(buf);
+}
+
+Definition::Type DefTree::definitionType() {
+    if (namedDefs.empty()) {
+        return Definition::Module;
+    }
+    return definition().def.type;
+}
+
+NamedDefinition &DefTree::definition() {
+    ENFORCE(namedDefs.size() == 1, "Cannot determine definitions for '{}' (size={})", name, namedDefs.size());
+    return namedDefs[0];
 }
 
 } // namespace sorbet::autogen
