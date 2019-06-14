@@ -852,7 +852,7 @@ void DefTree::writeAutoloads(core::Context ctx, std::string &path) {
 }
 
 void DefTree::requires(core::Context ctx, fmt::memory_buffer &buf) {
-    if (root()) {
+    if (root() || !hasDef()) {
         return;
     }
     auto &ndef = definition();
@@ -919,10 +919,15 @@ string DefTree::autoloads(core::Context ctx) {
 }
 
 Definition::Type DefTree::definitionType() {
-    if (namedDefs.empty()) {
+    // if (namedDefs.empty()) {
+    if (!hasDef()) {
         return Definition::Module;
     }
     return definition().def.type;
+}
+
+bool DefTree::hasDef() const {
+    return !(namedDefs.empty() && nonBehaviorDefs.empty());
 }
 
 NamedDefinition &DefTree::definition() {

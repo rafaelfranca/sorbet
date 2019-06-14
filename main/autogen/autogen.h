@@ -150,6 +150,7 @@ private:
     void predeclare(core::Context ctx, std::string_view fullName, fmt::memory_buffer &buf);
     void requires(core::Context ctx, fmt::memory_buffer &buf);
     bool hasDifferentFile(core::FileRef) const;
+    bool hasDef() const;
     NamedDefinition &definition();
     Definition::Type definitionType();
 };
