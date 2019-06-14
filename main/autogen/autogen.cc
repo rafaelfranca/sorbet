@@ -879,12 +879,13 @@ void DefTree::requires(core::Context ctx, const AutoloaderConfig &alCfg, fmt::me
 }
 
 void DefTree::predeclare(core::Context ctx, string_view fullName, fmt::memory_buffer &buf) {
-    if (!namedDefs.empty() && namedDefs[0].def.type == Definition::Class) {
+    if (hasDef() && definitionType() == Definition::Class) {
+        // if (!namedDefs.empty() && namedDefs[0].def.type == Definition::Class) {
         fmt::format_to(buf, "\nclass {}", fullName);
-        if (!namedDefs[0].parentName.empty()) {
-            fmt::format_to(buf, " < {}", fmt::map_join(namedDefs[0].parentName, "::", [&](const auto &nr) -> string {
-                               return nr.show(ctx);
-                           }));
+        auto &def = definition();
+        if (!def.parentName.empty()) {
+            fmt::format_to(buf, " < {}",
+                           fmt::map_join(def.parentName, "::", [&](const auto &nr) -> string { return nr.show(ctx); }));
         }
     } else {
         fmt::format_to(buf, "\nmodule {}", fullName);
