@@ -131,8 +131,10 @@ public:
     std::string name;                                             // TODO switch to refs
     UnorderedMap<std::string, std::unique_ptr<DefTree>> children; // TODO switch to refs
     std::vector<NamedDefinition> namedDefs;
+    std::vector<NamedDefinition> nonBehaviorDefs;
     std::vector<core::NameRef> nameParts;
 
+    bool root() const;
     void addDef(core::Context, const AutoloaderConfig &, const NamedDefinition &);
     void prettyPrint(core::Context ctx, int level = 0);
 

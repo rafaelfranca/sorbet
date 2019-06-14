@@ -747,6 +747,8 @@ void DefTree::addDef(core::Context ctx, const AutoloaderConfig &alCfg, const Nam
     }
     if (ndef.def.defines_behavior) {
         node->namedDefs.emplace_back(ndef);
+    } else {
+        node->nonBehaviorDefs.emplace_back(ndef);
     }
 }
 
@@ -791,17 +793,22 @@ core::FileRef DefTree::file() const {
     if (!namedDefs.empty()) {
         // TODO what if there are more than one?
         ref = namedDefs[0].fileRef;
+    } else if (!nonBehaviorDefs.empty()) {
+        // TODO this lacks sorting from `definition_sort_key`
+        ref = nonBehaviorDefs[0].fileRef;
     }
     return ref;
 }
 
 void DefTree::prune() {
     auto definingFile = file();
+    // fmt::print("PRUNING IN {} {}\n", name, definingFile.id());
     for (auto it = children.begin(); it != children.end(); ++it) {
         auto &child = it->second;
         if (child->hasDifferentFile(definingFile)) {
             child->prune();
         } else {
+            // fmt::print("  {} {}\n", child->name, child->file().id());
             children.erase(it);
         }
     }
@@ -823,6 +830,10 @@ bool DefTree::hasDifferentFile(core::FileRef file) const {
     return res;
 }
 
+bool DefTree::root() const {
+    return nameParts.empty();
+}
+
 void DefTree::writeAutoloads(core::Context ctx, std::string &path) {
     // fmt::print("writeAutoloads {} '{}'\n", name, path);
     if (!name.empty()) {
@@ -841,11 +852,10 @@ void DefTree::writeAutoloads(core::Context ctx, std::string &path) {
 }
 
 void DefTree::requires(core::Context ctx, fmt::memory_buffer &buf) {
-    if (namedDefs.empty()) {
+    if (root()) {
         return;
     }
-    // TODO what if there are more than one?
-    auto &ndef = namedDefs[0];
+    auto &ndef = definition();
     vector<string> reqs;
     for (auto reqRef : ndef.requires) {
         reqs.emplace_back(reqRef.show(ctx));
@@ -901,9 +911,9 @@ string DefTree::autoloads(core::Context ctx) {
             fmt::format_to(buf, "}})\n", fullName);
         }
     }
-    if (!namedDefs.empty()) {
-        fmt::format_to(buf, "\nOpus::Require.for_autoload({}, \"{}\")\n", fullName,
-                       definition().fileRef.data(ctx).path());
+    auto defFile = file();
+    if (defFile != EMPTY_FILE) {
+        fmt::format_to(buf, "\nOpus::Require.for_autoload({}, \"{}\")\n", fullName, defFile.data(ctx).path());
     }
     return to_string(buf);
 }
@@ -916,8 +926,13 @@ Definition::Type DefTree::definitionType() {
 }
 
 NamedDefinition &DefTree::definition() {
-    ENFORCE(namedDefs.size() == 1, "Cannot determine definitions for '{}' (size={})", name, namedDefs.size());
-    return namedDefs[0];
+    if (!namedDefs.empty()) {
+        ENFORCE(namedDefs.size() == 1, "Cannot determine definitions for '{}' (size={})", name, namedDefs.size());
+        return namedDefs[0];
+    } else {
+        ENFORCE(!nonBehaviorDefs.empty(), "Could not find any defintions for '{}'", name);
+        return nonBehaviorDefs[0];
+    }
 }
 
 } // namespace sorbet::autogen
