@@ -800,9 +800,14 @@ core::FileRef DefTree::file() const {
     return ref;
 }
 
+static const core::FileRef EMPTY_FILE;
 void DefTree::prune() {
-    auto definingFile = file();
-    // fmt::print("PRUNING IN {} {}\n", name, definingFile.id());
+    // auto definingFile = file();
+    core::FileRef definingFile = EMPTY_FILE;
+    if (!namedDefs.empty()) {
+        definingFile = file();
+    }
+    // fmt::print("PRUNING FOR {} {}\n", name, definingFile.id());
     for (auto it = children.begin(); it != children.end(); ++it) {
         auto &child = it->second;
         if (child->hasDifferentFile(definingFile)) {
@@ -814,7 +819,6 @@ void DefTree::prune() {
     }
 }
 
-static const core::FileRef EMPTY_FILE;
 bool DefTree::hasDifferentFile(core::FileRef file) const {
     bool res = false;
     auto visit = [&](const DefTree &node) -> bool {
