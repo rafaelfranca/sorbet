@@ -915,9 +915,16 @@ string DefTree::autoloads(core::Context ctx) {
             fmt::format_to(buf, "}})\n", fullName);
         }
     }
-    auto defFile = file();
-    if (defFile != EMPTY_FILE) {
-        fmt::format_to(buf, "\nOpus::Require.for_autoload({}, \"{}\")\n", fullName, defFile.data(ctx).path());
+
+    core::FileRef definingFile = EMPTY_FILE;
+    if (!namedDefs.empty()) {
+        definingFile = file();
+    } else if (children.empty() && hasDef()) {
+        definingFile = file();
+    }
+
+    if (definingFile != EMPTY_FILE) {
+        fmt::format_to(buf, "\nOpus::Require.for_autoload({}, \"{}\")\n", fullName, definingFile.data(ctx).path());
     }
     return to_string(buf);
 }

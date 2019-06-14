@@ -20,8 +20,6 @@ Opus::Require.autoload_map(Foo, {
   Errors: "autoloader/Foo/Errors.rb",
 })
 
-Opus::Require.for_autoload(Foo, "test/cli/autogen-autoloader/foo.rb")
-
 --- output/Foo/Bar.rb
 # frozen_string_literal: true
 # DO NOT TOUCH
@@ -41,8 +39,6 @@ Opus::Require.autoload_map(Foo::Bar, {
   Jazz: "autoloader/Foo/Bar/Jazz.rb",
   Quuz: "autoloader/Foo/Bar/Quuz.rb",
 })
-
-Opus::Require.for_autoload(Foo::Bar, "test/cli/autogen-autoloader/foo.rb")
 
 --- output/Foo/Bar/Jazz.rb
 # frozen_string_literal: true
@@ -95,8 +91,6 @@ Opus::Require.autoload_map(Foo::Errors, {
   MyError1: "autoloader/Foo/Errors/MyError1.rb",
   MyError2: "autoloader/Foo/Errors/MyError2.rb",
 })
-
-Opus::Require.for_autoload(Foo::Errors, "test/cli/autogen-autoloader/errors.rb")
 
 --- output/Foo/Errors/BaseError.rb
 # frozen_string_literal: true
@@ -156,8 +150,6 @@ Opus::Require.autoload_map(Yabba, {
   Dabba: "autoloader/Yabba/Dabba.rb",
 })
 
-Opus::Require.for_autoload(Yabba, "test/cli/autogen-autoloader/bar.rb")
-
 --- output/Yabba/Dabba.rb
 # frozen_string_literal: true
 # DO NOT TOUCH
@@ -175,8 +167,6 @@ Opus::Require.autoload_map(Yabba::Dabba, {
   Jazz: "autoloader/Yabba/Dabba/Jazz.rb",
   Quuz: "autoloader/Yabba/Dabba/Quuz.rb",
 })
-
-Opus::Require.for_autoload(Yabba::Dabba, "test/cli/autogen-autoloader/bar.rb")
 
 --- output/Yabba/Dabba/Bar2.rb
 # frozen_string_literal: true
@@ -207,8 +197,6 @@ end
 Opus::Require.autoload_map(Yabba::Dabba::Jazz, {
   JazBaz: "autoloader/Yabba/Dabba/Jazz/JazBaz.rb",
 })
-
-Opus::Require.for_autoload(Yabba::Dabba::Jazz, "test/cli/autogen-autoloader/bar.rb")
 
 --- output/Yabba/Dabba/Jazz/JazBaz.rb
 # frozen_string_literal: true
