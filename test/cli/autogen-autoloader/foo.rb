@@ -1,5 +1,6 @@
 # typed: true
 
+require 'byebug'
 require 'my_gem'
 
 module Foo

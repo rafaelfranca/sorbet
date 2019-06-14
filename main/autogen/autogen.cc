@@ -718,6 +718,10 @@ bool AutoloaderConfig::includePath(string_view path) const {
     return true;
 }
 
+bool AutoloaderConfig::includeRequire(const string &require) const {
+    return excludedRequires.find(require) == excludedRequires.end();
+}
+
 void DefTree::prettyPrint(core::Context ctx, int level) {
     auto fileRefToString = [&](const NamedDefinition &nd) -> string_view { return nd.fileRef.data(ctx).path(); };
     fmt::print("{} [{}]\n", name, fmt::map_join(namedDefs, ", ", fileRefToString));
@@ -838,10 +842,10 @@ bool DefTree::root() const {
     return nameParts.empty();
 }
 
-void DefTree::writeAutoloads(core::Context ctx, std::string &path) {
+void DefTree::writeAutoloads(core::Context ctx, const AutoloaderConfig &alCfg, std::string path) {
     // fmt::print("writeAutoloads {} '{}'\n", name, path);
     if (!name.empty()) {
-        FileOps::write(join(path, fmt::format("{}.rb", name)), autoloads(ctx));
+        FileOps::write(join(path, fmt::format("{}.rb", name)), autoloads(ctx, alCfg));
     }
     // fmt::print("write {} {} {}\n", name, needsChildAutoloads(), file().id());
     if (!children.empty()) {
@@ -850,19 +854,22 @@ void DefTree::writeAutoloads(core::Context ctx, std::string &path) {
             create_dir(subdir);
         }
         for (auto &[_, child] : children) {
-            child->writeAutoloads(ctx, subdir);
+            child->writeAutoloads(ctx, alCfg, subdir);
         }
     }
 }
 
-void DefTree::requires(core::Context ctx, fmt::memory_buffer &buf) {
+void DefTree::requires(core::Context ctx, const AutoloaderConfig &alCfg, fmt::memory_buffer &buf) {
     if (root() || !hasDef()) {
         return;
     }
     auto &ndef = definition();
     vector<string> reqs;
     for (auto reqRef : ndef.requires) {
-        reqs.emplace_back(reqRef.show(ctx));
+        string req = reqRef.show(ctx);
+        if (alCfg.includeRequire(req)) {
+            reqs.emplace_back(req);
+        }
     }
     fast_sort(reqs);
     auto last = unique(reqs.begin(), reqs.end());
@@ -891,10 +898,10 @@ string DefTree::path(core::Context ctx) {
     return fmt::format("{}.rb", fmt::map_join(nameParts, "/", toPath));
 }
 
-string DefTree::autoloads(core::Context ctx) {
+string DefTree::autoloads(core::Context ctx, const AutoloaderConfig &alCfg) {
     fmt::memory_buffer buf;
     fmt::format_to(buf, "{}\n", PREAMBLE);
-    requires(ctx, buf);
+    requires(ctx, alCfg, buf);
 
     string fullName = "nil";
     auto type = definitionType();

@@ -121,9 +121,35 @@ struct AutoloaderConfig { // TODO dynamic loading
         std::regex(R"(/bin/)"),        std::regex(R"(/rubocop/)"),
         std::regex(R"(/scripts/)"),
     };
+    UnorderedSet<std::string> excludedRequires = {
+        // These are referred to in scripts that aren't usable with our
+        // normal Gemfile. Many of them should probably be removed to
+        // make all executables reproducible.
+        "/deploy/batch-srv/current/extn",
+        "activemerchant",
+        "gmail",
+        "luhn",
+        "pdfkit",
+        "perftools",
+        "rugged",
+
+        // Only in the smartsync Gemfile. This should likely get reconciled with
+        // the main Gemfile eventually.
+        "listen",
+
+        // zookeeper group in Gemfile, normally excluded because compilation can be hairy
+        "zeke",
+
+        // ci_ignore group in Gemfile, not bundled in CI
+        "pry-rescue",
+        "pry-byebug",
+        "byebug",
+        "byebug/core",
+    };
 
     bool include(core::Context, const NamedDefinition &) const;
     bool includePath(std::string_view path) const;
+    bool includeRequire(const std::string &require) const;
 };
 
 class DefTree {
@@ -138,8 +164,8 @@ public:
     void addDef(core::Context, const AutoloaderConfig &, const NamedDefinition &);
     void prettyPrint(core::Context ctx, int level = 0);
 
-    void writeAutoloads(core::Context ctx, std::string &path);
-    std::string autoloads(core::Context ctx);
+    void writeAutoloads(core::Context ctx, const AutoloaderConfig &, std::string path);
+    std::string autoloads(core::Context ctx, const AutoloaderConfig &);
 
     std::string path(core::Context ctx);
 
@@ -148,7 +174,7 @@ public:
 private:
     core::FileRef file() const;
     void predeclare(core::Context ctx, std::string_view fullName, fmt::memory_buffer &buf);
-    void requires(core::Context ctx, fmt::memory_buffer &buf);
+    void requires(core::Context ctx, const AutoloaderConfig &, fmt::memory_buffer &buf);
     bool hasDifferentFile(core::FileRef) const;
     bool hasDef() const;
     NamedDefinition &definition();
