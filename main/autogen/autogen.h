@@ -154,6 +154,12 @@ struct AutoloaderConfig { // TODO dynamic loading
     bool include(core::Context, const NamedDefinition &) const;
     bool includePath(std::string_view path) const;
     bool includeRequire(const std::string &require) const;
+
+    AutoloaderConfig() = default;
+    AutoloaderConfig(const AutoloaderConfig &) = delete;
+    AutoloaderConfig(AutoloaderConfig &&) = default;
+    AutoloaderConfig &operator=(const AutoloaderConfig &) = delete;
+    AutoloaderConfig &operator=(AutoloaderConfig &&) = delete;
 };
 
 class DefTree {
@@ -175,6 +181,12 @@ public:
 
     void prune(const AutoloaderConfig &);
     bool prunable(const AutoloaderConfig &) const;
+
+    DefTree() = default;
+    DefTree(const DefTree &) = delete;
+    DefTree(DefTree &&) = default;
+    DefTree &operator=(const DefTree &) = delete;
+    DefTree &operator=(DefTree &&) = delete;
 
 private:
     core::FileRef file() const;
