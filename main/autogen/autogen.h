@@ -147,6 +147,10 @@ struct AutoloaderConfig { // TODO dynamic loading
         "byebug/core",
     };
 
+    std::vector<std::pair<int, std::string>> sameFileModules = {
+        {3, "Opus::Autogen::Event"}, // TODO how do I compare refs?
+    };
+
     bool include(core::Context, const NamedDefinition &) const;
     bool includePath(std::string_view path) const;
     bool includeRequire(const std::string &require) const;
@@ -169,7 +173,8 @@ public:
 
     std::string path(core::Context ctx);
 
-    void prune();
+    void prune(const AutoloaderConfig &);
+    bool prunable(const AutoloaderConfig &) const;
 
 private:
     core::FileRef file() const;

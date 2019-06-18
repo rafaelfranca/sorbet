@@ -805,22 +805,35 @@ core::FileRef DefTree::file() const {
 }
 
 static const core::FileRef EMPTY_FILE;
-void DefTree::prune() {
+void DefTree::prune(const AutoloaderConfig &alCfg) {
     // auto definingFile = file();
     core::FileRef definingFile = EMPTY_FILE;
     if (!namedDefs.empty()) {
         definingFile = file();
     }
+    if (!prunable(alCfg)) {
+        return;
+    }
+
     // fmt::print("PRUNING FOR {} {}\n", name, definingFile.id());
     for (auto it = children.begin(); it != children.end(); ++it) {
         auto &child = it->second;
         if (child->hasDifferentFile(definingFile)) {
-            child->prune();
+            child->prune(alCfg);
         } else {
             // fmt::print("  {} {}\n", child->name, child->file().id());
             children.erase(it);
         }
     }
+}
+
+bool DefTree::prunable(const AutoloaderConfig &alCfg) const {
+    for (const auto &[count, modName] : alCfg.sameFileModules) {
+        if (nameParts.size() == count && name == modName) {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool DefTree::hasDifferentFile(core::FileRef file) const {
