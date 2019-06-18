@@ -45,7 +45,7 @@ constexpr ErrorClass SigInFileWithoutSigil{5038, StrictLevel::False};
 constexpr ErrorClass RevealTypeInUntypedFile{5039, StrictLevel::False};
 
 constexpr ErrorClass OverloadNotAllowed{5040, StrictLevel::False};
-constexpr ErrorClass NonPublicOverload{5041, StrictLevel::True};
+constexpr ErrorClass NonPublicAbstract{5041, StrictLevel::True};
 } // namespace sorbet::core::errors::Resolver
 
 #endif
