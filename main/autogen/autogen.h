@@ -147,8 +147,8 @@ struct AutoloaderConfig { // TODO dynamic loading
         "byebug/core",
     };
 
-    std::vector<std::pair<int, std::string>> sameFileModules = {
-        {3, "Opus::Autogen::Event"}, // TODO how do I compare refs?
+    std::vector<std::vector<std::string>> sameFileModules = {
+        {"Opus", "Autogen", "Event"}, // TODO how do I compare refs?
     };
 
     bool include(core::Context, const NamedDefinition &) const;
@@ -179,8 +179,8 @@ public:
 
     std::string path(core::Context ctx);
 
-    void prune(const AutoloaderConfig &);
-    bool prunable(const AutoloaderConfig &) const;
+    void prune(core::Context, const AutoloaderConfig &);
+    bool prunable(core::Context, const AutoloaderConfig &) const;
 
     DefTree() = default;
     DefTree(const DefTree &) = delete;

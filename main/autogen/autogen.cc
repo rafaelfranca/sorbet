@@ -805,13 +805,13 @@ core::FileRef DefTree::file() const {
 }
 
 static const core::FileRef EMPTY_FILE;
-void DefTree::prune(const AutoloaderConfig &alCfg) {
+void DefTree::prune(core::Context ctx, const AutoloaderConfig &alCfg) {
     // auto definingFile = file();
     core::FileRef definingFile = EMPTY_FILE;
     if (!namedDefs.empty()) {
         definingFile = file();
     }
-    if (!prunable(alCfg)) {
+    if (!prunable(ctx, alCfg)) {
         return;
     }
 
@@ -819,7 +819,7 @@ void DefTree::prune(const AutoloaderConfig &alCfg) {
     for (auto it = children.begin(); it != children.end(); ++it) {
         auto &child = it->second;
         if (child->hasDifferentFile(definingFile)) {
-            child->prune(alCfg);
+            child->prune(ctx, alCfg);
         } else {
             // fmt::print("  {} {}\n", child->name, child->file().id());
             children.erase(it);
@@ -827,9 +827,20 @@ void DefTree::prune(const AutoloaderConfig &alCfg) {
     }
 }
 
-bool DefTree::prunable(const AutoloaderConfig &alCfg) const {
-    for (const auto &[count, modName] : alCfg.sameFileModules) {
-        if (nameParts.size() == count && name == modName) {
+bool DefTree::prunable(core::Context ctx, const AutoloaderConfig &alCfg) const {
+    for (const auto &parts : alCfg.sameFileModules) {
+        if (nameParts.size() != parts.size()) {
+            continue;
+        }
+        bool match = true;
+        for (int i = 0; i < parts.size(); ++i) {
+            if (parts[i] != nameParts[i].show(ctx)) {
+                match = false;
+                break;
+            }
+        }
+        if (match) {
+            fmt::print("HEYO match!!!\n");
             return false;
         }
     }
